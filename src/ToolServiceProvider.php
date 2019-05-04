@@ -10,6 +10,9 @@ use GlobalsProjects\InvoiceAdjustment\Http\Middleware\Authorize;
 
 class ToolServiceProvider extends ServiceProvider
 {
+
+    private $config = 'invoiceadjustment';
+
     /**
      * Bootstrap any application services.
      *
@@ -18,10 +21,21 @@ class ToolServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'invoice-adjustment');
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'invoice-adjustment');
 
         $this->app->booted(function () {
             $this->routes();
         });
+
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../config/'.$this->config.'.php' => base_path('config/'.$this->config.'.php'),
+            ], 'config');
+        }
+
+        $this->publishes([
+            __DIR__.'/../resources/lang' => resource_path('lang/vendor/invoice-adjustment'),
+        ], 'lang');
 
         Nova::serving(function (ServingNova $event) {
             //
@@ -51,6 +65,6 @@ class ToolServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->mergeConfigFrom(__DIR__.'/../config/'.$this->config.'.php', $this->config);
     }
 }
