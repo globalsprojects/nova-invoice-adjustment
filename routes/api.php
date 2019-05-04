@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,3 +14,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/config', 'GlobalsProjects\InvoiceAdjustment\Http\Controllers\InvoiceAdjustmentController@config');
+Route::post('/apply', 'GlobalsProjects\InvoiceAdjustment\Http\Controllers\InvoiceAdjustmentController@apply');

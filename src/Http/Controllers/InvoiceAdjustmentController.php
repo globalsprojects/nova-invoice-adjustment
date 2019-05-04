@@ -1,6 +1,7 @@
 <?php
 namespace GlobalsProjects\InvoiceAdjustment\Http\Controllers;
 
+use Illuminate\Http\Request;
 use GlobalsProjects\InvoiceAdjustment\Library\InvoiceUtility;
 
 class InvoiceAdjustmentController
@@ -25,7 +26,6 @@ class InvoiceAdjustmentController
      * Returns the current configuration to be used in the
      * user interface
      *
-     * @todo validate the configuration and provide errors if necessary
      * @return \Illuminate\Http\JsonResponse
      */
     public function config()
@@ -35,6 +35,22 @@ class InvoiceAdjustmentController
                 'config' => config('invoiceadjustment'),
                 'invoices' => $this->invoiceUtility->getAllInvoices(),
                 'messages' => __('invoice-adjustment::tool')
+            ]);
+    }
+
+    /**
+     * Apply the invoice adjustment
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function apply(Request $request)
+    {
+        dd($request);
+        $this->invoiceUtility->adjust();
+
+        return response()
+            ->json([
+                'status' => 'okay!'
             ]);
     }
 }

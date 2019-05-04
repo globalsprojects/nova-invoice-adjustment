@@ -22,11 +22,19 @@ class InvoiceUtility
     {
         $invoiceCollection = collect([]);
 
-        $this->model->each(function($invoice) use ($invoiceCollection) {
+        $this->model->with(['tickets.streaming', 'tickets.discount'])->each(function($invoice) use ($invoiceCollection) {
             $invoiceCollection->push($invoice);
         });
 
         return $invoiceCollection;
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    public function adjust($invoice)
+    {
+        dd($invoice);
     }
 
 }
