@@ -45,8 +45,8 @@ class InvoiceAdjustmentController
      */
     public function apply(Request $request)
     {
-        dd($request);
-        $this->invoiceUtility->adjust();
+
+        $this->invoiceUtility->adjust($request);
 
         return response()
             ->json([
