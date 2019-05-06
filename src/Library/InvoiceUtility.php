@@ -60,6 +60,8 @@ class InvoiceUtility
         $adjustedInvoice->tickets()->saveMany($tickets);
         $adjustedInvoice->ancestor()->associate($invoice);
         $adjustedInvoice->save();
+
+        return $adjustedInvoice;
     }
 
 }

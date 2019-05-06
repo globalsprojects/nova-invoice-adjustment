@@ -808,7 +808,7 @@ exports = module.exports = __webpack_require__(0)(false);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n.invoice-select {\n\tmax-width: 50%;\n}\n", ""]);
 
 // exports
 
@@ -823,6 +823,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue_multiselect___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_vue_multiselect__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AdjustmentItem__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AdjustmentItem___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__AdjustmentItem__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__SuccessPanel__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__SuccessPanel___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__SuccessPanel__);
 //
 //
 //
@@ -848,6 +850,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 
 
 
@@ -856,22 +869,29 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 	name: 'adjustment-form',
 	components: {
 		Multiselect: __WEBPACK_IMPORTED_MODULE_0_vue_multiselect___default.a,
-		AdjustmentItem: __WEBPACK_IMPORTED_MODULE_1__AdjustmentItem___default.a
+		AdjustmentItem: __WEBPACK_IMPORTED_MODULE_1__AdjustmentItem___default.a,
+		SuccessPanel: __WEBPACK_IMPORTED_MODULE_2__SuccessPanel___default.a
 	},
 	props: ['messages', 'invoices'],
 	data: function data() {
 		return {
 			loading: false,
 			invoice: null,
-			deletedItems: []
+			deletedItems: [],
+			adjusted: null
 		};
 	},
 	methods: {
+		isDeleted: function isDeleted(item) {
+			return this.deletedItems.map(function (deletedItem) {
+				return deletedItem.id;
+			}).includes(item.id);
+		},
 		toggleDeleteItem: function toggleDeleteItem(item) {
 			var _this = this;
 
-			if (this.deletedItems.includes(item)) {
-				this.deletedItems.splice(this.deletedItems.indexOf(item.id), 1);
+			if (this.isDeleted(item)) {
+				this.deletedItems.splice(this.deletedItems.indexOf(item), 1);
 			} else {
 				this.deletedItems.push(item);
 			}
@@ -896,11 +916,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 			var vm = this;
 			Nova.request().post('/nova-vendor/invoice-adjustment/apply', vm.invoice).then(function (response) {
 				console.log(response);
+				_this2.adjusted = response.data.adjusted;
 			}).catch(function (error) {
 				_this2.$toasted.show(error.response.data.message, { type: 'error' });
 			}).finally(function () {
 				vm.loading = false;
 			});
+		},
+		reset: function reset() {
+			location.reload();
 		}
 	}
 });
@@ -997,7 +1021,7 @@ exports = module.exports = __webpack_require__(0)(false);
 
 
 // module
-exports.push([module.i, "\n.adjustment-item {\n  background: green;\n  margin-bottom: 20px;\n  cursor: pointer;\n}\n.adjustment-item.is-delete {\n    background: red;\n}\n", ""]);
+exports.push([module.i, "\n.adjustment-item {\n  border: 2px solid transparent;\n  cursor: pointer;\n}\n.adjustment-item:hover {\n    border-color: var(--primary);\n}\n.adjustment-item.is-delete {\n    background: rgba(231, 68, 68, 0.25);\n}\n.adjustment-item.is-delete:hover {\n      border-color: var(--danger);\n}\n.adjustment-item .card-img img {\n    max-width: 100px;\n}\n", ""]);
 
 // exports
 
@@ -1015,10 +1039,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
 	name: 'adjustment-item',
-	props: ['item', 'deleted']
+	props: ['item', 'deleted'],
+	methods: {
+		formattedPrice: function formattedPrice(price) {
+			return (price / 100).toFixed(2) + ' €';
+		}
+	}
 });
 
 /***/ }),
@@ -1031,15 +1065,39 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
-    { staticClass: "adjustment-item", class: { "is-delete": !!_vm.deleted } },
+    {
+      staticClass: "card px-6 py-4 adjustment-item flex flex-wrap mb-3",
+      class: { "is-delete": !!_vm.deleted }
+    },
     [
-      _c("p", [_vm._v("Name: " + _vm._s(_vm.item.streaming.name))]),
-      _vm._v(" "),
-      _c("p", [
-        _vm._v("Discount: " + _vm._s(_vm.item.discount ? "yes" : "no"))
+      _c("div", { staticClass: "w-1/3 pr-3" }, [
+        _c("img", {
+          attrs: {
+            src: "/storage/" + _vm.item.streaming.image,
+            alt: "Streaming img"
+          }
+        })
       ]),
       _vm._v(" "),
-      _c("p", [_vm._v("Price: " + _vm._s(_vm.item.price))])
+      _c("div", { staticClass: "card-info w-2/3" }, [
+        _c("h3", { staticClass: "text-2xl text-80 font-bold mb-2" }, [
+          _vm._v(_vm._s(_vm.item.streaming.name))
+        ]),
+        _vm._v(" "),
+        _c("p", { staticClass: "mb-1" }, [
+          _vm._v(
+            _vm._s(
+              _vm.item.discount
+                ? "Con descuento del " + _vm.item.discount.percentage + "%"
+                : "Sin descuento"
+            )
+          )
+        ]),
+        _vm._v(" "),
+        _c("p", { staticClass: "text-base text-80 font-bold mb-1" }, [
+          _vm._v(_vm._s(_vm.formattedPrice(_vm.item.price)))
+        ])
+      ])
     ]
   )
 }
@@ -1061,135 +1119,202 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    [
-      _c(
-        "multiselect",
-        {
-          staticClass: "mb-3",
-          attrs: {
-            options: _vm.invoices,
-            label: "reference",
-            "track-by": "id"
-          },
-          scopedSlots: _vm._u([
-            {
-              key: "singleLabel",
-              fn: function(props) {
-                return [
-                  _c("span", { staticClass: "option__desc" }, [
-                    _c("span", { staticClass: "option__title" }, [
-                      _vm._v(_vm._s(props.option.reference))
-                    ])
-                  ])
-                ]
-              }
-            },
-            {
-              key: "option",
-              fn: function(props) {
-                return [
-                  _c("div", { staticClass: "option__desc" }, [
-                    _c("span", { staticClass: "option__title" }, [
-                      _vm._v(
-                        _vm._s(
-                          props.option.reference +
-                            " (" +
-                            props.option.customer_name +
-                            ")"
-                        )
-                      )
-                    ]),
-                    _vm._v(" "),
-                    props.option.rectifieds.length
-                      ? _c("span", { staticClass: "option__small" }, [
-                          _vm._v(
-                            "- Rectificada (" +
-                              _vm._s(
-                                props.option.rectifieds
-                                  .map(function(rectified) {
-                                    return rectified.reference
-                                  })
-                                  .toString()
-                              ) +
-                              ")"
-                          )
-                        ])
-                      : _vm._e()
-                  ])
-                ]
-              }
-            }
-          ]),
-          model: {
-            value: _vm.invoice,
-            callback: function($$v) {
-              _vm.invoice = $$v
-            },
-            expression: "invoice"
-          }
-        },
-        [
-          _vm._v(" "),
-          _vm._v(" "),
-          _c("span", { attrs: { slot: "noResult" }, slot: "noResult" }, [
-            _vm._v(_vm._s(_vm.messages["recipients-no-result"]))
-          ]),
-          _vm._v(" "),
-          _c("span", { attrs: { slot: "noOptions" }, slot: "noOptions" }, [
-            _vm._v(_vm._s(_vm.messages["recipients-no-options"]))
-          ])
-        ]
-      ),
-      _vm._v(" "),
-      _vm.invoice
-        ? _c(
-            "div",
-            { staticClass: "mb-3" },
-            _vm._l(_vm.invoice.tickets, function(item) {
-              return _c(
-                "div",
-                {
-                  on: {
-                    click: function($event) {
-                      return _vm.toggleDeleteItem(item)
-                    }
-                  }
+  return !_vm.adjusted
+    ? _c("div", { staticClass: "card px-6 py-4" }, [
+        _c("h3", { staticClass: "text-base text-80 font-bold mb-3" }, [
+          _vm._v(_vm._s(_vm.messages["invoice-title"]))
+        ]),
+        _vm._v(" "),
+        _c(
+          "div",
+          { staticClass: "mb-6" },
+          [
+            _c("p", { staticClass: "mb-2 italic" }, [
+              _vm._v(_vm._s(_vm.messages["invoice-subtitle"]))
+            ]),
+            _vm._v(" "),
+            _c(
+              "multiselect",
+              {
+                staticClass: "mb-6 invoice-select",
+                attrs: {
+                  options: _vm.invoices,
+                  label: "reference",
+                  "track-by": "id",
+                  placeholder: _vm.messages["multiselect-placeholder"],
+                  optionsLimit: "10",
+                  selectLabel: _vm.messages["multiselect-select-text"],
+                  deselectLabel: _vm.messages["multiselect-remove-text"],
+                  selectedLabel: _vm.messages["multiselect-selected-text"]
                 },
-                [
-                  _c("adjustment-item", {
-                    attrs: {
-                      item: item,
-                      deleted: _vm.deletedItems.includes(item)
+                scopedSlots: _vm._u(
+                  [
+                    {
+                      key: "singleLabel",
+                      fn: function(props) {
+                        return [
+                          _c("span", { staticClass: "option__desc" }, [
+                            _c("span", { staticClass: "option__title" }, [
+                              _vm._v(_vm._s(props.option.reference))
+                            ]),
+                            _vm._v(" "),
+                            props.option.rectifieds.length
+                              ? _c("span", { staticClass: "option__small" }, [
+                                  _vm._v(
+                                    "- " +
+                                      _vm._s(_vm.messages["adjusted"]) +
+                                      " (" +
+                                      _vm._s(
+                                        props.option.rectifieds
+                                          .map(function(rectified) {
+                                            return rectified.reference
+                                          })
+                                          .toString()
+                                      ) +
+                                      ")"
+                                  )
+                                ])
+                              : _vm._e()
+                          ])
+                        ]
+                      }
+                    },
+                    {
+                      key: "option",
+                      fn: function(props) {
+                        return [
+                          _c("div", { staticClass: "option__desc" }, [
+                            _c("span", { staticClass: "option__title" }, [
+                              _vm._v(
+                                _vm._s(
+                                  props.option.reference +
+                                    " (" +
+                                    props.option.customer_name +
+                                    ")"
+                                )
+                              )
+                            ]),
+                            _vm._v(" "),
+                            props.option.rectifieds.length
+                              ? _c("span", { staticClass: "option__small" }, [
+                                  _vm._v(
+                                    "- " +
+                                      _vm._s(_vm.messages["adjusted"]) +
+                                      " (" +
+                                      _vm._s(
+                                        props.option.rectifieds
+                                          .map(function(rectified) {
+                                            return rectified.reference
+                                          })
+                                          .toString()
+                                      ) +
+                                      ")"
+                                  )
+                                ])
+                              : _vm._e()
+                          ])
+                        ]
+                      }
                     }
-                  })
-                ],
-                1
-              )
-            }),
-            0
-          )
-        : _vm._e(),
-      _vm._v(" "),
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-default btn-primary",
-          attrs: { disabled: _vm.loading || !_vm.deletedItems.length },
-          on: {
-            click: function($event) {
-              return _vm.applyAdjustment()
+                  ],
+                  null,
+                  false,
+                  2493381978
+                ),
+                model: {
+                  value: _vm.invoice,
+                  callback: function($$v) {
+                    _vm.invoice = $$v
+                  },
+                  expression: "invoice"
+                }
+              },
+              [
+                _vm._v(" "),
+                _vm._v(" "),
+                _c("span", { attrs: { slot: "noResult" }, slot: "noResult" }, [
+                  _vm._v(_vm._s(_vm.messages["multiselect-no-result"]))
+                ]),
+                _vm._v(" "),
+                _c(
+                  "span",
+                  { attrs: { slot: "noOptions" }, slot: "noOptions" },
+                  [_vm._v(_vm._s(_vm.messages["multiselect-no-options"]))]
+                )
+              ]
+            )
+          ],
+          1
+        ),
+        _vm._v(" "),
+        _vm.invoice
+          ? _c("div", { staticClass: "invoice-details" }, [
+              _c("h3", { staticClass: "text-base text-80 font-bold mb-3" }, [
+                _vm._v(_vm._s(_vm.messages["tickets-title"]))
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "mb-8" }, [
+                _c("p", { staticClass: "mb-2 italic" }, [
+                  _vm._v(_vm._s(_vm.messages["tickets-subtitle"]))
+                ]),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  { staticClass: "flex flex-wrap -mx-3 mb-3" },
+                  _vm._l(_vm.invoice.tickets, function(item) {
+                    return _c(
+                      "div",
+                      {
+                        directives: [
+                          {
+                            name: "key",
+                            rawName: "v-key",
+                            value: item.id,
+                            expression: "item.id"
+                          }
+                        ],
+                        staticClass: "px-3 mb-6 w-1/3",
+                        on: {
+                          click: function($event) {
+                            return _vm.toggleDeleteItem(item)
+                          }
+                        }
+                      },
+                      [
+                        _c("adjustment-item", {
+                          attrs: {
+                            item: item,
+                            deleted: _vm.deletedItems.includes(item)
+                          }
+                        })
+                      ],
+                      1
+                    )
+                  }),
+                  0
+                )
+              ])
+            ])
+          : _vm._e(),
+        _vm._v(" "),
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-default btn-primary",
+            attrs: { disabled: _vm.loading || !_vm.deletedItems.length },
+            on: {
+              click: function($event) {
+                return _vm.applyAdjustment()
+              }
             }
-          }
-        },
-        [_vm._v("Apply")]
-      ),
-      _vm._v(" "),
-      _c("pre", [_c("code", [_vm._v(_vm._s(_vm.invoice))])])
-    ],
-    1
-  )
+          },
+          [_vm._v(_vm._s(_vm.messages["apply"]))]
+        )
+      ])
+    : _c("success-panel", {
+        attrs: { messages: _vm.messages, adjusted: _vm.adjusted },
+        on: { reset: _vm.reset }
+      })
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -1250,6 +1375,280 @@ if (false) {
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 25 */,
+/* 26 */,
+/* 27 */,
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__(29)
+}
+var normalizeComponent = __webpack_require__(2)
+/* script */
+var __vue_script__ = __webpack_require__(31)
+/* template */
+var __vue_template__ = __webpack_require__(32)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = injectStyle
+/* scopeId */
+var __vue_scopeId__ = "data-v-2df00f2c"
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/js/components/SuccessPanel.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-2df00f2c", Component.options)
+  } else {
+    hotAPI.reload("data-v-2df00f2c", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(30);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(1)("23cccfd8", content, false, {});
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-2df00f2c\",\"scoped\":true,\"hasInlineConfig\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./SuccessPanel.vue", function() {
+     var newContent = require("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-2df00f2c\",\"scoped\":true,\"hasInlineConfig\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./SuccessPanel.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(0)(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n.success-background[data-v-2df00f2c] {\n    background-color: var(--success);\n    height: 100%;\n    opacity: .7;\n    position: absolute;\n    width: 100%;\n    z-index: -1;\n}\n.img-wrapper[data-v-2df00f2c] {\n    height: 100px;\n    width: 100px;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+/* 31 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    name: "SuccessPanel",
+    props: {
+        messages: Object,
+        adjusted: Object
+    }
+});
+
+/***/ }),
+/* 32 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "flex-row" }, [
+    _c(
+      "div",
+      {
+        staticClass:
+          "flex flex-wrap w-full border-success rounded-lg relative overflow-hidden"
+      },
+      [
+        _c("div", { staticClass: "success-background" }),
+        _vm._v(" "),
+        _c(
+          "div",
+          {
+            staticClass:
+              "content-wrapper flex items-center flex-col justify-center w-full p-8"
+          },
+          [
+            _c("div", { staticClass: "img-wrapper" }, [
+              _c(
+                "svg",
+                {
+                  attrs: {
+                    xmlns: "http://www.w3.org/2000/svg",
+                    viewBox: "0 0 64 64",
+                    fill: "#FFF"
+                  }
+                },
+                [
+                  _c(
+                    "defs",
+                    [
+                      _c(
+                        "linearGradient",
+                        {
+                          attrs: {
+                            y2: "157.23",
+                            x2: "0",
+                            y1: "211.23",
+                            gradientUnits: "userSpaceOnUse",
+                            id: "0"
+                          }
+                        },
+                        [
+                          _c("stop", { attrs: { "stop-color": "#2fae61" } }),
+                          _c("stop", {
+                            attrs: { offset: "1", "stop-color": "#4bdf88" }
+                          })
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  ),
+                  _c("circle", {
+                    attrs: {
+                      r: "28",
+                      cy: "184.55",
+                      cx: "768.86",
+                      fill: "url(#0)",
+                      transform: "matrix(.92857 0 0 .92857-681.94-139.37)"
+                    }
+                  }),
+                  _c("path", {
+                    attrs: {
+                      d:
+                        "m773.85 193.97l-1.89-1.89c-.259-.259-.574-.389-.945-.389-.371 0-.686.13-.945.389l-9.116 9.13-4.085-4.099c-.259-.259-.574-.389-.945-.389-.371 0-.686.13-.945.389l-1.89 1.89c-.259.259-.389.574-.389.945 0 .37.13.686.389.945l5.03 5.03 1.89 1.89c.259.259.574.389.945.389.37 0 .685-.13.945-.389l1.89-1.89 10.06-10.06c.259-.259.389-.574.389-.945 0-.37-.13-.685-.389-.945",
+                      fill: "#fff",
+                      "fill-opacity": ".851",
+                      transform: "matrix(1.33268 0 0 1.33268-985.46-232.86)"
+                    }
+                  })
+                ]
+              )
+            ]),
+            _vm._v(" "),
+            _c(
+              "div",
+              {
+                staticClass: "w-1/2 mt-6 mb-6 text-center",
+                staticStyle: { color: "var(--white)" }
+              },
+              [
+                _c("h2", { staticClass: "text-3xl mb-6" }, [
+                  _vm._v(_vm._s(_vm.messages["success-header"]))
+                ]),
+                _vm._v(" "),
+                _c("h2", { staticClass: "text-3xl mb-6" }, [
+                  _vm._v(_vm._s(_vm.adjusted.reference))
+                ]),
+                _vm._v(" "),
+                _c("p", { staticClass: "text-lg mb-8" }, [
+                  _vm._v(_vm._s(_vm.messages["success-copy"]))
+                ]),
+                _vm._v(" "),
+                _c("p", [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-default btn-white text-primary",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.$emit("reset")
+                        }
+                      }
+                    },
+                    [
+                      _vm._v(
+                        "\n                        " +
+                          _vm._s(_vm.messages["success-button"]) +
+                          "\n                    "
+                      )
+                    ]
+                  )
+                ])
+              ]
+            )
+          ]
+        )
+      ]
+    )
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-2df00f2c", module.exports)
+  }
+}
 
 /***/ })
 /******/ ]);

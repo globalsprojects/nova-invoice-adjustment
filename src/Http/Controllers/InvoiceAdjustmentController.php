@@ -46,11 +46,11 @@ class InvoiceAdjustmentController
     public function apply(Request $request)
     {
 
-        $this->invoiceUtility->adjust($request);
+        $adjustedInvoice = $this->invoiceUtility->adjust($request);
 
         return response()
             ->json([
-                'status' => 'okay!'
+                'adjusted' => $adjustedInvoice
             ]);
     }
 }
