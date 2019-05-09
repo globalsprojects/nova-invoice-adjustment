@@ -6,7 +6,7 @@
 		<div class="card-info w-2/3">
 			<h3 class="text-2xl text-80 font-bold mb-2">{{ item.streaming.name }}</h3>
 			<p class="mb-1">{{ item.discount ? 'Con descuento del ' + item.discount.percentage + '%' : 'Sin descuento' }}</p>
-			<p class="text-base text-80 font-bold mb-1">{{ formattedPrice(item.price) }}</p>
+			<p class="text-base text-80 font-bold mb-1">{{ formattedPrice(item.discount ? calculateDiscountPrice(item) : item.price) }}</p>
 		</div>
 	</div>
 </template>
@@ -17,13 +17,16 @@
 		methods: {
 			formattedPrice(price) {
 				return (price / 100).toFixed(2) + ' €'
+			},
+			calculateDiscountPrice(item) {
+				return  item.price - (item.price * (item.discount.percentage / 100))
 			}
 		}
 	}
 </script>
 <style lang="scss">
 	.adjustment-item {
-		border: 2px solid transparent;
+		border: 2px solid #e8e8e8;
 		cursor: pointer;
 
 		&:hover {
@@ -32,6 +35,7 @@
 
 		&.is-delete {
 			background: rgba(231, 68, 68, 0.25);
+			border-color: rgba(231, 68, 68, 0.25);
 
 			&:hover {
 				border-color: var(--danger);

@@ -65,7 +65,7 @@ export default {
 
 			if (this.deletedItems.length > 0) {
 				this.invoice.changes = {
-					amount: -Math.abs(this.deletedItems.reduce((price, item) => price + item.price, 0)),
+					amount: -Math.abs(this.deletedItems.reduce((price, item) => price + (item.discount ? (item.price - (item.price * (item.discount.percentage / 100))) : item.price), 0)),
 					tickets: this.invoice.tickets.filter(filteredItem => this.deletedItems.includes(filteredItem))
 				}
 			} else {
